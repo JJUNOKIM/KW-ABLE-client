@@ -8,4 +8,12 @@ export default defineConfig({
       '@': '/src',
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://219.255.242.174:8082',
+        changeOrigin: true,
+      },
+    },
+  },
 })
