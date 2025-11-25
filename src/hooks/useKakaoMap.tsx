@@ -1,18 +1,30 @@
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Location } from '@/types/location'
+import { NodeData } from '@/components/Map/KakaoMap'
 import CurrentLocationIcon from '@/assets/icons/current.svg'
+import { createRoot } from 'react-dom/client'
+import { NodeMarker } from '@/components/Map/NodeMarker'
 
 interface UseKakaoMapProps {
   center?: Location
   level?: number
   showCurrentLocation?: boolean
+  nodes?: NodeData[]
+  onNodeClick?: (node: NodeData) => void
 }
 
-export const useKakaoMap = ({ center, level = 3, showCurrentLocation = false }: UseKakaoMapProps = {}) => {
+export const useKakaoMap = ({
+  center,
+  level = 3,
+  showCurrentLocation = false,
+  nodes = [],
+  onNodeClick
+}: UseKakaoMapProps = {}) => {
   const mapRef = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<kakao.maps.Map | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
   const markerRef = useRef<kakao.maps.CustomOverlay | null>(null)
+  const nodeMarkersRef = useRef<kakao.maps.CustomOverlay[]>([])
 
   useEffect(() => {
     if (!window.kakao?.maps) {
@@ -76,6 +88,48 @@ export const useKakaoMap = ({ center, level = 3, showCurrentLocation = false }: 
       }
     }
   }, [map, center, showCurrentLocation])
+
+  useEffect(() => {
+    if (!map || !isLoaded) return
+
+    nodeMarkersRef.current.forEach((overlay) => {
+      overlay.setMap(null)
+    })
+    nodeMarkersRef.current = []
+
+    nodes.forEach((node) => {
+      const markerDiv = document.createElement('div')
+      const root = createRoot(markerDiv)
+
+      root.render(
+        <NodeMarker
+          name={node.nodeName}
+          distance={node.distance}
+          onClick={() => {
+            onNodeClick?.(node)
+          }}
+        />
+      )
+
+      const position = new window.kakao.maps.LatLng(node.latitude, node.longitude)
+
+      const overlay = new window.kakao.maps.CustomOverlay({
+        position,
+        content: markerDiv,
+        yAnchor: 1.2,
+      })
+
+      overlay.setMap(map)
+      nodeMarkersRef.current.push(overlay)
+    })
+
+    return () => {
+      nodeMarkersRef.current.forEach((overlay) => {
+        overlay.setMap(null)
+      })
+      nodeMarkersRef.current = []
+    }
+  }, [map, isLoaded, nodes, onNodeClick])
 
   return { mapRef, map, isLoaded }
 }
