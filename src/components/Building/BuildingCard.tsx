@@ -36,8 +36,8 @@ export const BuildingCard = ({ building, onClick }: BuildingCardProps) => {
           </p>
         )}
         {building.distance !== undefined && (
-          <p className="text-white text-[12px] tracking-wide">
-            현위치에서 {building.distance}<span className="font-bold">m</span>
+          <p className="text-white text-[10px] tracking-wide">
+            현 위치에서 {building.distance}m
           </p>
         )}
       </div>

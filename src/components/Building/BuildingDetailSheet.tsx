@@ -78,21 +78,21 @@ export const BuildingDetailSheet = ({
                 </div>
               </div>
 
-              {building.accessibility.hasElevator && (
-                <div className="flex items-center gap-3">
-                  <img src={ElevatorIcon} alt="" width={16} height={16} />
-                  <span className="text-sm text-gray-700">엘레베이터 있음</span>
-                </div>
-              )}
+              <div className="flex items-center gap-3">
+                <img src={ElevatorIcon} alt="" width={16} height={16} />
+                <span className="text-sm text-gray-700">
+                  엘리베이터 {building.accessibility.hasElevator ? '있음' : '없음'}
+                </span>
+              </div>
 
-              {building.accessibility.hasAccessibleRestroom && (
-                <div className="flex items-center gap-3">
-                  <img src={BathroomIcon} alt="" width={18} height={16} />
-                  <span className="text-sm text-gray-700">
-                    장애인 화장실 {building.accessibility.accessibleRestroomFloor || ''}
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center gap-3">
+                <img src={BathroomIcon} alt="" width={18} height={16} />
+                <span className="text-sm text-gray-700">
+                  장애인 화장실 {building.accessibility.hasAccessibleRestroom
+                    ? (building.accessibility.accessibleRestroomFloor || '있음')
+                    : '없음'}
+                </span>
+              </div>
             </div>
           )}
 
