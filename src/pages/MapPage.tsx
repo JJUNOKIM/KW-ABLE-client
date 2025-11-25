@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { KakaoMap } from '@/components/Map/KakaoMap'
+import { useNavigate } from 'react-router-dom'
+import { KakaoMap, NodeData } from '@/components/Map/KakaoMap'
 import { SearchBar } from '@/components/Map/SearchBar'
 import { CurrentLocationButton } from '@/components/Map/CurrentLocationButton'
 import { BuildingCard } from '@/components/Building/BuildingCard'
@@ -7,60 +8,136 @@ import { BuildingList } from '@/components/Building/BuildingList'
 import { BuildingDetailSheet } from '@/components/Building/BuildingDetailSheet'
 import { useGeolocation } from '@/hooks/useGeolocation'
 import { Building, BuildingListItem } from '@/types/building'
+import { buildingService } from '@/services/buildingService'
+import { getBuildingImage } from '@/utils/buildingImages'
+import { getBuildingDetail } from '@/data/buildingDetails'
 import BoardingPointLogo from '@/assets/icons/Boarding Point.svg'
 
 type ViewMode = 'initial' | 'search' | 'detail' | 'route'
 
 const MapPage = () => {
+  const navigate = useNavigate()
   const { location } = useGeolocation()
   const [viewMode, setViewMode] = useState<ViewMode>('initial')
   const [buildings, setBuildings] = useState<BuildingListItem[]>([])
+  const [nodes, setNodes] = useState<NodeData[]>([])
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [mapCenter, setMapCenter] = useState(location)
 
-  // 건물 목록 로드 ( 더미 데이터 )
-  // API 연동하면 buildingService.getBuildings() 사용
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371e3
+    const toRad = (deg: number) => (deg * Math.PI) / 180
+
+    const dLat = toRad(lat2 - lat1)
+    const dLon = toRad(lon2 - lon1)
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    return R * c
+  }
+
   useEffect(() => {
-    const mockBuildings: BuildingListItem[] = [
-      {
-        id: '1',
-        name: '새빛관',
-        department: '인공지능융합대학',
-        distance: 100,
-        imageUrl: '',
-      },
-      {
-        id: '2',
-        name: '비마관',
-        department: '공과대학',
-        distance: 150,
-        imageUrl: '',
-      },
-      {
-        id: '3',
-        name: '참빛관',
-        department: '자연과학대학',
-        distance: 200,
-        imageUrl: '',
-      },
-      {
-        id: '4',
-        name: '옥의관',
-        department: '경영대학',
-        distance: 250,
-        imageUrl: '',
-      },
-      {
-        id: '5',
-        name: '화도관',
-        department: '사회과학대학',
-        distance: 300,
-        imageUrl: '',
+    const loadBuildingsAndNodes = async () => {
+      try {
+        const response = await fetch('/api/buildings')
+        const rawData = await response.json()
+
+        const buildingsData: BuildingListItem[] = rawData.map((item: any) => {
+          let distance: number | undefined
+
+          if (location) {
+            distance = calculateDistance(
+              location.latitude,
+              location.longitude,
+              item.latitude,
+              item.longitude
+            )
+          }
+
+          const detail = getBuildingDetail(item.nodeId)
+
+          return {
+            id: item.nodeId,
+            name: item.nodeName,
+            department: detail?.department,
+            distance: distance ? Math.round(distance) : undefined,
+            imageUrl: getBuildingImage(item.nodeName),
+          }
+        })
+
+        setBuildings(buildingsData)
+
+        const nodesData: NodeData[] = rawData.map((item: any) => {
+          let distance: number | undefined
+
+          if (location) {
+            distance = calculateDistance(
+              location.latitude,
+              location.longitude,
+              item.latitude,
+              item.longitude
+            )
+          }
+
+          return {
+            nodeId: item.nodeId,
+            nodeName: item.nodeName,
+            latitude: item.latitude,
+            longitude: item.longitude,
+            distance,
+          }
+        })
+
+        setNodes(nodesData)
+      } catch (error) {
+        console.error('건물 데이터 로드 실패:', error)
+        const mockBuildings: BuildingListItem[] = [
+          {
+            id: '1',
+            name: '새빛관',
+            department: '인공지능융합대학',
+            distance: 100,
+            imageUrl: getBuildingImage('새빛관'),
+          },
+          {
+            id: '2',
+            name: '비마관',
+            department: '공과대학',
+            distance: 150,
+            imageUrl: getBuildingImage('비마관'),
+          },
+          {
+            id: '3',
+            name: '참빛관',
+            department: '자연과학대학',
+            distance: 200,
+            imageUrl: getBuildingImage('참빛관'),
+          },
+          {
+            id: '4',
+            name: '옥의관',
+            department: '경영대학',
+            distance: 250,
+            imageUrl: getBuildingImage('옥의관'),
+          },
+          {
+            id: '5',
+            name: '화도관',
+            department: '사회과학대학',
+            distance: 300,
+            imageUrl: getBuildingImage('화도관'),
+          }
+        ]
+        setBuildings(mockBuildings)
       }
-    ]
-    setBuildings(mockBuildings)
-  }, [])
+    }
+
+    loadBuildingsAndNodes()
+  }, [location])
 
   const handleSearchFocus = () => {
     setViewMode('search')
@@ -71,22 +148,22 @@ const MapPage = () => {
     setSearchQuery('')
   }
 
-  //API 연동하면 buildingService.getBuildingDetail() 사용
   const handleBuildingCardClick = async (building: BuildingListItem) => {
-    const mockDetail: Building = {
+    const detail = getBuildingDetail(building.id)
+
+    const response = await fetch('/api/buildings')
+    const rawData = await response.json()
+    const nodeData = rawData.find((item: any) => item.nodeId === building.id)
+
+    const buildingDetail: Building = {
       ...building,
-      latitude: 37.6205,
-      longitude: 127.0593,
-      phone: '02-940-5114',
-      accessibility: {
-        wheelchairAccess: 4,
-        hasElevator: true,
-        elevatorLocation: '1층',
-        hasAccessibleRestroom: true,
-        accessibleRestroomFloor: '2F',
-      },
+      latitude: nodeData?.latitude || 37.6205,
+      longitude: nodeData?.longitude || 127.0593,
+      phone: detail?.phone || '02-940-5114',
+      accessibility: detail?.accessibility,
     }
-    setSelectedBuilding(mockDetail)
+
+    setSelectedBuilding(buildingDetail)
     setViewMode('detail')
   }
 
@@ -101,19 +178,26 @@ const MapPage = () => {
     }
   }
 
-  // 사용자 위치 변경 시 지도 중심 이동
   useEffect(() => {
     if (location) {
       setMapCenter(location)
     }
   }, [location])
 
+  const handleNodeClick = (node: NodeData) => {
+    setMapCenter({ latitude: node.latitude, longitude: node.longitude })
+  }
+
   return (
     <div className="relative w-full h-full overflow-hidden">
-      {/* 지도 */}
-      <KakaoMap center={mapCenter || undefined} level={3} showCurrentLocation={!!location} />
+      <KakaoMap
+        center={mapCenter || undefined}
+        level={3}
+        showCurrentLocation={!!location}
+        nodes={nodes}
+        onNodeClick={handleNodeClick}
+      />
 
-      {/* 헤더 */}
       <div className="absolute top-6 left-0 right-0 z-10 safe-area-top">
         {viewMode === 'initial' && (
           <div className="bg-transparent">
@@ -139,7 +223,6 @@ const MapPage = () => {
         )}
       </div>
 
-      {/* 검색 결과 */}
       {viewMode === 'search' && (
         <div className="absolute top-[72px] left-0 right-0 bottom-0 z-20 bg-white">
           <BuildingList
@@ -149,29 +232,40 @@ const MapPage = () => {
         </div>
       )}
 
-      {/* 카드 */}
       {viewMode === 'initial' && (
         <div className="absolute bottom-10 left-0 right-0 z-10 pb-6 safe-area-bottom">
           <div className="flex gap-4 px-5 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
-            {buildings.slice(0, 5).map((building) => (
+            {buildings.map((building) => (
               <BuildingCard key={building.id} building={building} onClick={() => handleBuildingCardClick(building)} />
             ))}
           </div>
         </div>
       )}
 
-      {/* 현재 위치로 이동 버튼 */}
       {(viewMode === 'initial' || viewMode === 'detail') && (
         <CurrentLocationButton onClick={handleCurrentLocation} className="absolute bottom-44 right-5 z-10" />
       )}
 
-      {/* 빌딩 정보 파트 */}
       {viewMode === 'detail' && selectedBuilding && (
         <BuildingDetailSheet
           building={selectedBuilding}
           onClose={handleCloseDetail}
-          onSetStart={() => console.log('출발 설정')}
-          onSetDestination={() => console.log('도착 설정')}
+          onSetStart={() => {
+            navigate('/route', {
+              state: {
+                selectedBuilding: { id: selectedBuilding.id, name: selectedBuilding.name },
+                mode: 'start',
+              },
+            })
+          }}
+          onSetDestination={() => {
+            navigate('/route', {
+              state: {
+                selectedBuilding: { id: selectedBuilding.id, name: selectedBuilding.name },
+                mode: 'end',
+              },
+            })
+          }}
         />
       )}
     </div>
