@@ -29,7 +29,6 @@ export interface BuildingListItem {
   imageUrl?: string
 }
 
-// API 응답을 Building 타입으로 변환
 export function convertNodeToBuilding(node: NodeDto, distance?: number): Building {
   return {
     id: node.nodeId,
@@ -40,11 +39,11 @@ export function convertNodeToBuilding(node: NodeDto, distance?: number): Buildin
   }
 }
 
-// API 응답을 BuildingListItem 타입으로 변환
-export function convertNodeToBuildingListItem(node: NodeDto, distance?: number): BuildingListItem {
+export function convertNodeToBuildingListItem(node: NodeDto, distance?: number, imageUrl?: string): BuildingListItem {
   return {
     id: node.nodeId,
     name: node.nodeName,
     distance,
+    imageUrl,
   }
 }

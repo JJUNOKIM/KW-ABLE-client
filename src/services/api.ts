@@ -1,6 +1,8 @@
 import axios, { AxiosInstance } from 'axios'
+import { BuildingResponse, RouteResponse } from '@/types/api'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://219.255.242.174:8082'
+// 개발 환경에서는 프록시를 통해 요청, 프로덕션에서는 직접 요청
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 
 class ApiService {
   private client: AxiosInstance
@@ -32,6 +34,18 @@ class ApiService {
 
   getClient() {
     return this.client
+  }
+
+  async getBuildings(): Promise<BuildingResponse[]> {
+    const response = await this.client.get<BuildingResponse[]>('/api/buildings')
+    return response.data
+  }
+
+  async getRoute(startNodeId: string, endNodeId: string): Promise<RouteResponse> {
+    const response = await this.client.get<RouteResponse>('/api/route', {
+      params: { startNodeId, endNodeId },
+    })
+    return response.data
   }
 }
 

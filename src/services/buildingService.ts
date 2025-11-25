@@ -1,6 +1,8 @@
 import { apiClient } from './api'
 import { Building, BuildingListItem, convertNodeToBuildingListItem } from '@/types/building'
 import { BuildingResponse } from '@/types/api'
+import { getBuildingImage } from '@/utils/buildingImages'
+import { getBuildingDetail } from '@/data/buildingDetails'
 
 // 두 좌표 간 거리 계산
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -25,13 +27,17 @@ export const buildingService = {
     const response = await apiClient.get<BuildingResponse[]>('/api/buildings')
 
     return response.data.map((building) =>
-      convertNodeToBuildingListItem({
-        nodeId: building.nodeId,
-        nodeName: building.nodeName,
-        nodeType: '',
-        latitude: building.latitude,
-        longitude: building.longitude,
-      })
+      convertNodeToBuildingListItem(
+        {
+          nodeId: building.nodeId,
+          nodeName: building.nodeName,
+          nodeType: '',
+          latitude: building.latitude,
+          longitude: building.longitude,
+        },
+        undefined,
+        getBuildingImage(building.nodeName)
+      )
     )
   },
 
@@ -84,7 +90,8 @@ export const buildingService = {
           latitude: building.latitude,
           longitude: building.longitude,
         },
-        Math.round(distance)
+        Math.round(distance),
+        getBuildingImage(building.nodeName)
       )
     })
 
