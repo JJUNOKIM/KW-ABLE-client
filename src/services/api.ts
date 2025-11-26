@@ -1,8 +1,8 @@
 import axios, { AxiosInstance } from 'axios'
 import { BuildingResponse, RouteResponse } from '@/types/api'
 
-// 개발 환경에서는 프록시를 통해 요청, 프로덕션에서는 직접 요청
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
+// Vercel Serverless Functions를 사용하므로 상대 경로로 요청
+const API_BASE_URL = ''
 
 class ApiService {
   private client: AxiosInstance
