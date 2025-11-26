@@ -1,5 +1,6 @@
 import { useKakaoMap } from '@/hooks/useKakaoMap.tsx'
 import { Location } from '@/types/location'
+import { RouteResponse } from '@/types/api'
 
 export interface NodeData {
   nodeId: string
@@ -16,6 +17,7 @@ interface KakaoMapProps {
   showCurrentLocation?: boolean
   nodes?: NodeData[]
   onNodeClick?: (node: NodeData) => void
+  route?: RouteResponse | null
 }
 
 export const KakaoMap = ({
@@ -24,14 +26,16 @@ export const KakaoMap = ({
   className = '',
   showCurrentLocation = false,
   nodes = [],
-  onNodeClick
+  onNodeClick,
+  route = null
 }: KakaoMapProps) => {
   const { mapRef, isLoaded } = useKakaoMap({
     center,
     level,
     showCurrentLocation,
     nodes,
-    onNodeClick
+    onNodeClick,
+    route
   })
 
   return (
