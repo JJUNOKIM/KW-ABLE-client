@@ -37,7 +37,6 @@ const RouteGuidancePage = () => {
     }
   }, [state, navigate])
 
-  // 경로에 맞게 지도 범위 조정
   useEffect(() => {
     if (!map || !isLoaded || !state?.route || !mapRef.current) return
 
@@ -61,11 +60,9 @@ const RouteGuidancePage = () => {
     map.setBounds(bounds)
 
     setTimeout(() => {
-      const currentLevel = map.getLevel()
-      map.setLevel(currentLevel + 1)
-
       const mapHeight = mapRef.current?.offsetHeight || 0
-      map.panBy(0, mapHeight * 0.2)
+      const sheetHeight = mapHeight * 0.5
+      map.panBy(0, -sheetHeight / 3)
     }, 100)
   }, [map, isLoaded, state, mapRef])
 

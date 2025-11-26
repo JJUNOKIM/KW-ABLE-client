@@ -27,7 +27,7 @@ export const DualSearchBar = ({
           style={{ backgroundColor: '#672424' }}
           className="flex items-center gap-2 rounded-lg px-4 py-3 cursor-pointer"
         >
-          <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: '#536DFE' }} />
           <input
             type="text"
             value={startValue}
@@ -43,7 +43,7 @@ export const DualSearchBar = ({
           style={{ backgroundColor: '#672424' }}
           className="flex items-center gap-2 rounded-lg px-4 py-3 cursor-pointer"
         >
-          <div className="w-2 h-2 rounded-full bg-accent flex-shrink-0" />
+          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: '#501B1B' }} />
           <input
             type="text"
             value={endValue}
