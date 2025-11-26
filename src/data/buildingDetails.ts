@@ -1,13 +1,11 @@
-import { Building } from '@/types/building'
-
 type BuildingDetailData = {
   department?: string
   phone?: string
   accessibility?: {
-    wheelchairAccess?: number
-    hasElevator?: boolean
+    wheelchairAccess: number
+    hasElevator: boolean
     elevatorLocation?: string
-    hasAccessibleRestroom?: boolean
+    hasAccessibleRestroom: boolean
     accessibleRestroomFloor?: string
   }
 }
