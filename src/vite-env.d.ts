@@ -20,10 +20,17 @@ declare namespace kakao.maps {
     setCenter(latlng: LatLng): void
     getLevel(): number
     setLevel(level: number): void
+    setBounds(bounds: LatLngBounds): void
+    panBy(x: number, y: number): void
   }
 
   class LatLng {
     constructor(latitude: number, longitude: number)
+  }
+
+  class LatLngBounds {
+    constructor()
+    extend(latlng: LatLng): void
   }
 
   class Marker {
@@ -34,6 +41,12 @@ declare namespace kakao.maps {
   class CustomOverlay {
     constructor(options: CustomOverlayOptions)
     setMap(map: Map | null): void
+  }
+
+  class Polyline {
+    constructor(options: PolylineOptions)
+    setMap(map: Map | null): void
+    setPath(path: LatLng[]): void
   }
 
   interface MapOptions {
@@ -50,5 +63,17 @@ declare namespace kakao.maps {
     position: LatLng
     content: string | HTMLElement
     map?: Map
+    yAnchor?: number
+    clickable?: boolean
+  }
+
+  interface PolylineOptions {
+    path: LatLng[]
+    strokeWeight?: number
+    strokeColor?: string
+    strokeOpacity?: number
+    strokeStyle?: 'solid' | 'shortdash' | 'shortdot' | 'shortdashdot' | 'shortdashdotdot' | 'dot' | 'dash' | 'dashdot' | 'longdash' | 'longdashdot' | 'longdashdotdot'
+    endArrow?: boolean
+    zIndex?: number
   }
 }
