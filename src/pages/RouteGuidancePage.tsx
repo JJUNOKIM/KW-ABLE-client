@@ -37,37 +37,6 @@ const RouteGuidancePage = () => {
     }
   }, [state, navigate])
 
-  useEffect(() => {
-    if (!map || !isLoaded || !state?.route || !mapRef.current) return
-
-    const route = state.route
-    const bounds = new window.kakao.maps.LatLngBounds()
-
-    if (route.startNode) {
-      bounds.extend(new window.kakao.maps.LatLng(route.startNode.latitude, route.startNode.longitude))
-    }
-    if (route.endNode) {
-      bounds.extend(new window.kakao.maps.LatLng(route.endNode.latitude, route.endNode.longitude))
-    }
-
-    if (route.edges) {
-      route.edges.forEach((edge) => {
-        bounds.extend(new window.kakao.maps.LatLng(edge.fromNode.latitude, edge.fromNode.longitude))
-        bounds.extend(new window.kakao.maps.LatLng(edge.toNode.latitude, edge.toNode.longitude))
-      })
-    }
-
-    setTimeout(() => {
-      map.setBounds(bounds)
-
-      setTimeout(() => {
-        const mapHeight = mapRef.current?.offsetHeight || 0
-        const sheetHeight = mapHeight * 0.5
-        map.panBy(0, -sheetHeight / 3)
-      }, 100)
-    }, 300)
-  }, [map, isLoaded, state, mapRef])
-
   if (!state?.route) {
     return null
   }

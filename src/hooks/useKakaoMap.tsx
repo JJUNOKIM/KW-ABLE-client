@@ -141,7 +141,6 @@ export const useKakaoMap = ({
     }
   }, [map, isLoaded, nodes, onNodeClick])
 
-  // 경로 그리기
   useEffect(() => {
     if (!map || !isLoaded) return
 
@@ -150,6 +149,7 @@ export const useKakaoMap = ({
 
     if (!route?.edges?.length) return
 
+    const bounds = new window.kakao.maps.LatLngBounds()
     const edgesWithWarning = mapWarningsToEdges(route)
 
     edgesWithWarning.forEach((edge) => {
@@ -161,6 +161,9 @@ export const useKakaoMap = ({
         edge.toNode.latitude,
         edge.toNode.longitude
       )
+
+      bounds.extend(startLatLng)
+      bounds.extend(endLatLng)
 
       const polyline = new window.kakao.maps.Polyline({
         path: [startLatLng, endLatLng],
@@ -174,6 +177,8 @@ export const useKakaoMap = ({
       polyline.setMap(map)
       polylinesRef.current.push(polyline)
     })
+
+    map.setBounds(bounds)
 
     if (route.startNode) {
       startMarkerRef.current?.setMap(null)
