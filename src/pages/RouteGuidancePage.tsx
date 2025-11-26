@@ -57,13 +57,15 @@ const RouteGuidancePage = () => {
       })
     }
 
-    map.setBounds(bounds)
-
     setTimeout(() => {
-      const mapHeight = mapRef.current?.offsetHeight || 0
-      const sheetHeight = mapHeight * 0.5
-      map.panBy(0, -sheetHeight / 3)
-    }, 100)
+      map.setBounds(bounds)
+
+      setTimeout(() => {
+        const mapHeight = mapRef.current?.offsetHeight || 0
+        const sheetHeight = mapHeight * 0.5
+        map.panBy(0, -sheetHeight / 3)
+      }, 100)
+    }, 300)
   }, [map, isLoaded, state, mapRef])
 
   if (!state?.route) {
