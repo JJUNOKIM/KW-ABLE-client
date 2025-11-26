@@ -76,7 +76,7 @@ const RouteResultPage = () => {
                 </div>
               </div>
               <button
-                onClick={() => navigate('/route-guidance', { state: { route, startPoint, endPoint } })}
+                onClick={() => navigate('/route-navigation', { state: { route, startPoint, endPoint } })}
                 className="px-5 py-2.5 rounded-lg text-white font-semibold whitespace-nowrap ml-4"
                 style={{ backgroundColor: '#501B1B' }}
               >

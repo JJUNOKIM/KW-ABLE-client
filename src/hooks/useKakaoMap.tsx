@@ -33,6 +33,8 @@ export const useKakaoMap = ({
   const polylinesRef = useRef<kakao.maps.Polyline[]>([])
   const startMarkerRef = useRef<kakao.maps.CustomOverlay | null>(null)
   const endMarkerRef = useRef<kakao.maps.CustomOverlay | null>(null)
+  const isBoundsSet = useRef(false)
+  const currentRoute = useRef<RouteResponse | null>(null)
 
   useEffect(() => {
     if (!window.kakao?.maps) {
@@ -144,29 +146,48 @@ export const useKakaoMap = ({
   useEffect(() => {
     if (!map || !isLoaded) return
 
+    // 데이터 없으면 기존 경로 지우고 종료
+    if (!route?.edges?.length) {
+      if (currentRoute.current !== null) {
+        polylinesRef.current.forEach((polyline) => polyline.setMap(null))
+        polylinesRef.current = []
+        startMarkerRef.current?.setMap(null)
+        startMarkerRef.current = null
+        endMarkerRef.current?.setMap(null)
+        endMarkerRef.current = null
+        currentRoute.current = null
+        isBoundsSet.current = false
+      }
+      return
+    }
+
+    // 이미 그린 경로면 다시 안 그림
+    if (currentRoute.current === route) {
+      return
+    }
+
+    // 기존 경로 지우기
     polylinesRef.current.forEach((polyline) => polyline.setMap(null))
     polylinesRef.current = []
-
-    if (!route?.edges?.length) return
 
     const bounds = new window.kakao.maps.LatLngBounds()
     const edgesWithWarning = mapWarningsToEdges(route)
 
     edgesWithWarning.forEach((edge) => {
-      const startLatLng = new window.kakao.maps.LatLng(
+      const startPos = new window.kakao.maps.LatLng(
         edge.fromNode.latitude,
         edge.fromNode.longitude
       )
-      const endLatLng = new window.kakao.maps.LatLng(
+      const endPos = new window.kakao.maps.LatLng(
         edge.toNode.latitude,
         edge.toNode.longitude
       )
 
-      bounds.extend(startLatLng)
-      bounds.extend(endLatLng)
+      bounds.extend(startPos)
+      bounds.extend(endPos)
 
-      const polyline = new window.kakao.maps.Polyline({
-        path: [startLatLng, endLatLng],
+      const line = new window.kakao.maps.Polyline({
+        path: [startPos, endPos],
         strokeWeight: 8,
         strokeColor: getRouteColor(edge.difficultyLevel, edge.hasWarning),
         strokeOpacity: 0.9,
@@ -174,31 +195,28 @@ export const useKakaoMap = ({
         zIndex: 100,
       })
 
-      polyline.setMap(map)
-      polylinesRef.current.push(polyline)
+      line.setMap(map)
+      polylinesRef.current.push(line)
     })
 
-    map.setBounds(bounds)
+    // 처음 지도 범위 설정
+    if (!isBoundsSet.current) {
+      map.setBounds(bounds)
+      isBoundsSet.current = true
 
-    const sw = (bounds as any).getSouthWest()
-    const ne = (bounds as any).getNorthEast()
-    const latSpan = ne.getLat() - sw.getLat()
+      // 지도 리렌더링
+      requestAnimationFrame(() => {
+        const level = (map as any).getLevel()
+        ;(map as any).setLevel(level)
+      })
+    }
 
-    requestAnimationFrame(() => {
-      const center = (map as any).getCenter()
-      const offsetLat = latSpan * 0.15
-      const newCenter = new window.kakao.maps.LatLng(
-        center.getLat() + offsetLat,
-        center.getLng()
-      )
-      map.setCenter(newCenter)
-    })
-
+    // 출발지 마커
     if (route.startNode) {
       startMarkerRef.current?.setMap(null)
 
-      const markerDiv = document.createElement('div')
-      markerDiv.style.cssText = `
+      const markerEl = document.createElement('div')
+      markerEl.style.cssText = `
         width: 16px;
         height: 16px;
         background-color: #536DFE;
@@ -207,24 +225,25 @@ export const useKakaoMap = ({
         box-shadow: 0 2px 4px rgba(0,0,0,0.3);
       `
 
-      const overlay = new window.kakao.maps.CustomOverlay({
+      const startOverlay = new window.kakao.maps.CustomOverlay({
         position: new window.kakao.maps.LatLng(
           route.startNode.latitude,
           route.startNode.longitude
         ),
-        content: markerDiv,
+        content: markerEl,
         yAnchor: 0.5,
       })
 
-      overlay.setMap(map)
-      startMarkerRef.current = overlay
+      startOverlay.setMap(map)
+      startMarkerRef.current = startOverlay
     }
 
+    // 도착지 마커
     if (route.endNode) {
       endMarkerRef.current?.setMap(null)
 
-      const markerDiv = document.createElement('div')
-      markerDiv.style.cssText = `
+      const markerEl = document.createElement('div')
+      markerEl.style.cssText = `
         width: 16px;
         height: 16px;
         background-color: #501B1B;
@@ -233,18 +252,20 @@ export const useKakaoMap = ({
         box-shadow: 0 2px 4px rgba(0,0,0,0.3);
       `
 
-      const overlay = new window.kakao.maps.CustomOverlay({
+      const endOverlay = new window.kakao.maps.CustomOverlay({
         position: new window.kakao.maps.LatLng(
           route.endNode.latitude,
           route.endNode.longitude
         ),
-        content: markerDiv,
+        content: markerEl,
         yAnchor: 0.5,
       })
 
-      overlay.setMap(map)
-      endMarkerRef.current = overlay
+      endOverlay.setMap(map)
+      endMarkerRef.current = endOverlay
     }
+
+    currentRoute.current = route
 
     return () => {
       polylinesRef.current.forEach((p) => p.setMap(null))

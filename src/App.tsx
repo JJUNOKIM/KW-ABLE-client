@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import MapPage from './pages/MapPage'
 import RouteSelectionPage from './pages/RouteSelectionPage'
 import RouteResultPage from './pages/RouteResultPage'
-import RouteGuidancePage from './pages/RouteGuidancePage'
+import RouteNavigation from './pages/RouteNavigation'
 
 function App() {
   return (
@@ -12,7 +12,7 @@ function App() {
           <Route path="/" element={<MapPage />} />
           <Route path="/route" element={<RouteSelectionPage />} />
           <Route path="/route-result" element={<RouteResultPage />} />
-          <Route path="/route-guidance" element={<RouteGuidancePage />} />
+          <Route path="/route-navigation" element={<RouteNavigation />} />
         </Routes>
       </Router>
     </div>

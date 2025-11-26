@@ -6,19 +6,24 @@ import GoStraightIcon from '@/assets/icons/icons_goStraight.svg'
 import TurnLeftIcon from '@/assets/icons/icons_turnLeft.svg'
 import TurnRightIcon from '@/assets/icons/icons_turnRight.svg'
 import WarnIcon from '@/assets/icons/icons_warn.svg'
-import { useEffect } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useKakaoMap } from '@/hooks/useKakaoMap'
 
-interface RouteGuidanceState {
+interface RouteNavigationState {
   route: RouteResponse
   startPoint: BuildingListItem
   endPoint: BuildingListItem
 }
 
-const RouteGuidancePage = () => {
+const RouteNavigation = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const state = location.state as RouteGuidanceState | null
+  const state = location.state as RouteNavigationState | null
+
+  const [sheetHeight, setSheetHeight] = useState(60)
+  const [dragging, setDragging] = useState(false)
+  const touchStartY = useRef(0)
+  const sheetStartPos = useRef(60)
 
   const defaultCenter = {
     latitude: 37.6205,
@@ -36,6 +41,49 @@ const RouteGuidancePage = () => {
       navigate('/route')
     }
   }, [state, navigate])
+
+  const onDragStart = (e: React.TouchEvent) => {
+    e.stopPropagation()
+    setDragging(true)
+    touchStartY.current = e.touches[0].clientY
+    sheetStartPos.current = sheetHeight
+  }
+
+  const onDragMove = (e: React.TouchEvent) => {
+    if (!dragging) return
+    e.stopPropagation()
+
+    const moveY = e.touches[0].clientY - touchStartY.current
+    const movePercent = (moveY / window.innerHeight) * 100
+    const nextPos = sheetStartPos.current + movePercent
+
+    // 드래그 범위 제한
+    if (nextPos < 6.5) {
+      setSheetHeight(6.5)
+    } else if (nextPos > 95) {
+      setSheetHeight(95)
+    } else {
+      setSheetHeight(nextPos)
+    }
+  }
+
+  const onDragEnd = (e: React.TouchEvent) => {
+    e.stopPropagation()
+    setDragging(false)
+
+    // 스냅 이동
+    if (sheetHeight < 34) {
+      setSheetHeight(6.5)
+    } else if (sheetHeight < 65) {
+      setSheetHeight(60)
+    } else if (sheetHeight < 75) {
+      setSheetHeight(70)
+    } else if (sheetHeight < 87) {
+      setSheetHeight(80)
+    } else {
+      setSheetHeight(95)
+    }
+  }
 
   if (!state?.route) {
     return null
@@ -80,7 +128,22 @@ const RouteGuidancePage = () => {
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 top-[65%] z-10 bg-white rounded-t-2xl shadow-lg flex flex-col">
+        <div
+          className="absolute bottom-0 left-0 right-0 z-10 bg-white rounded-t-2xl shadow-lg flex flex-col"
+          style={{
+            top: `${sheetHeight}%`,
+            transition: dragging ? 'none' : 'top 0.3s ease-out'
+          }}
+        >
+          <div
+            className="py-3 flex justify-center cursor-grab active:cursor-grabbing"
+            style={{ touchAction: 'none' }}
+            onTouchStart={onDragStart}
+            onTouchMove={onDragMove}
+            onTouchEnd={onDragEnd}
+          >
+            <div className="w-12 h-1 bg-gray-300 rounded-full"></div>
+          </div>
           <div className="flex-1 overflow-y-auto">
             {instructions.length > 0 ? (
               <div>
@@ -155,4 +218,4 @@ const RouteGuidancePage = () => {
   )
 }
 
-export default RouteGuidancePage
+export default RouteNavigation
