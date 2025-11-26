@@ -60,10 +60,12 @@ const RouteGuidancePage = () => {
 
     map.setBounds(bounds)
 
-    // 하단 시트 고려한 중앙 정렬
     setTimeout(() => {
+      const currentLevel = map.getLevel()
+      map.setLevel(currentLevel + 1)
+
       const mapHeight = mapRef.current?.offsetHeight || 0
-      map.panBy(0, mapHeight * 0.25)
+      map.panBy(0, mapHeight * 0.2)
     }, 100)
   }, [map, isLoaded, state, mapRef])
 

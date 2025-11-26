@@ -45,7 +45,7 @@ const RouteResultPage = () => {
     <div className="relative w-full h-full flex flex-col">
       {/* 지도 */}
       <div className="flex-1 relative">
-        <KakaoMap center={mapCenter} level={4} route={route} />
+        <KakaoMap center={mapCenter} level={2} route={route} />
 
         {/* 상단 헤더 */}
         <div className="absolute top-0 left-0 right-0 z-10">
