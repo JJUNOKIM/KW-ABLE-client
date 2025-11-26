@@ -25,7 +25,7 @@ const RouteGuidancePage = () => {
     longitude: 127.0593,
   }
 
-  const { mapRef, map, isLoaded } = useKakaoMap({
+  const { mapRef } = useKakaoMap({
     center: defaultCenter,
     level: 4,
     route: state?.route || null,
