@@ -4,6 +4,7 @@ import { DualSearchBar } from '@/components/Route/DualSearchBar'
 import { BuildingList } from '@/components/Building/BuildingList'
 import { BuildingListItem } from '@/types/building'
 import { apiService } from '@/services/api'
+import { getBuildingImage } from '@/utils/buildingImages'
 import CloseIcon from '@/assets/icons/icons_close.svg'
 
 type SelectionMode = 'start' | 'end' | null
@@ -64,7 +65,7 @@ const RouteSelectionPage = () => {
         id: building.nodeId,
         name: building.nodeName,
         department: '',
-        imageUrl: '',
+        imageUrl: getBuildingImage(building.nodeName),
       }))
       setBuildings(buildingList)
       setFilteredBuildings(buildingList)
@@ -107,9 +108,27 @@ const RouteSelectionPage = () => {
     }
   }
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (startPoint && endPoint) {
-      console.log('경로 검색:', startPoint, endPoint)
+      try {
+        const routeData = await apiService.getRoute(startPoint.id, endPoint.id)
+
+        if (!routeData.edges?.length) {
+          alert('해당 경로를 찾을 수 없습니다. 다른 경로를 선택해주세요')
+          return
+        }
+
+        navigate('/route-result', {
+          state: {
+            route: routeData,
+            startPoint,
+            endPoint,
+          },
+        })
+      } catch (error) {
+        console.error('경로 검색 실패:', error)
+        alert('경로를 찾을 수 없습니다.')
+      }
     }
   }
 
@@ -122,14 +141,16 @@ const RouteSelectionPage = () => {
               {selectionMode === 'start' ? '출발지 선택' : '도착지 선택'}
             </h1>
           )}
-          {!selectionMode && <div />}
+          {!selectionMode && (
+            <h1 className="text-lg font-semibold text-white">경로 검색</h1>
+          )}
           <button onClick={handleBack} className="p-1">
             <img src={CloseIcon} alt="닫기" width={17} height={17} />
           </button>
         </div>
 
         {!selectionMode && (
-          <div className="relative px-4 pb-4">
+          <div className="relative px-5 pb-4">
             <DualSearchBar
               startValue={startPoint?.name || ''}
               endValue={endPoint?.name || ''}

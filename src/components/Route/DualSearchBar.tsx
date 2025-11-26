@@ -31,7 +31,7 @@ export const DualSearchBar = ({
           <input
             type="text"
             value={startValue}
-            placeholder="  출발지를 입력"
+            placeholder="  출발지 입력"
             readOnly
             style={{ backgroundColor: '#672424' }}
             className="flex-1 outline-none text-sm text-white placeholder-white/70 cursor-pointer"
@@ -47,7 +47,7 @@ export const DualSearchBar = ({
           <input
             type="text"
             value={endValue}
-            placeholder="  도착지를 입력"
+            placeholder="  도착지 입력"
             readOnly
             style={{ backgroundColor: '#672424' }}
             className="flex-1 outline-none text-sm text-white placeholder-white/70 cursor-pointer"
@@ -61,7 +61,7 @@ export const DualSearchBar = ({
           className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center justify-center"
           aria-label="출발/도착 바꾸기"
         >
-          <img src={ChangeEachIcon} alt="교체" width={20} height={20} />
+          <img src={ChangeEachIcon} alt="교체" width={28} height={28} />
         </button>
       )}
 
