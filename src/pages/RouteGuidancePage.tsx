@@ -80,7 +80,7 @@ const RouteGuidancePage = () => {
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 top-[50%] z-10 bg-white rounded-t-2xl shadow-lg flex flex-col">
+        <div className="absolute bottom-0 left-0 right-0 top-[65%] z-10 bg-white rounded-t-2xl shadow-lg flex flex-col">
           <div className="flex-1 overflow-y-auto">
             {instructions.length > 0 ? (
               <div>

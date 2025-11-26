@@ -180,9 +180,18 @@ export const useKakaoMap = ({
 
     map.setBounds(bounds)
 
+    const sw = (bounds as any).getSouthWest()
+    const ne = (bounds as any).getNorthEast()
+    const latSpan = ne.getLat() - sw.getLat()
+
     requestAnimationFrame(() => {
-      const currentLevel = (map as any).getLevel()
-      ;(map as any).setLevel(currentLevel)
+      const center = (map as any).getCenter()
+      const offsetLat = latSpan * 0.15
+      const newCenter = new window.kakao.maps.LatLng(
+        center.getLat() + offsetLat,
+        center.getLng()
+      )
+      map.setCenter(newCenter)
     })
 
     if (route.startNode) {
