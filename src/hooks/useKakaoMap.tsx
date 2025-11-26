@@ -180,6 +180,11 @@ export const useKakaoMap = ({
 
     map.setBounds(bounds)
 
+    requestAnimationFrame(() => {
+      const currentLevel = (map as any).getLevel()
+      ;(map as any).setLevel(currentLevel)
+    })
+
     if (route.startNode) {
       startMarkerRef.current?.setMap(null)
 
