@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { DualSearchBar } from '@/components/Route/DualSearchBar'
 import { BuildingList } from '@/components/Building/BuildingList'
@@ -25,7 +25,6 @@ const RouteSelectionPage = () => {
   const [startPoint, setStartPoint] = useState<BuildingListItem | null>(null)
   const [endPoint, setEndPoint] = useState<BuildingListItem | null>(null)
   const [buildings, setBuildings] = useState<BuildingListItem[]>([])
-  const [filteredBuildings, setFilteredBuildings] = useState<BuildingListItem[]>([])
   const [selectionMode, setSelectionMode] = useState<SelectionMode>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -48,17 +47,14 @@ const RouteSelectionPage = () => {
     }
   }, [state, buildings])
 
-  useEffect(() => {
+  const filteredBuildings = useMemo(() => {
     if (searchQuery.trim() === '') {
-      setFilteredBuildings(buildings)
-    } else {
-      setFilteredBuildings(
-        buildings.filter((b) => b.name.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
+      return buildings
     }
+    return buildings.filter((b) => b.name.toLowerCase().includes(searchQuery.toLowerCase()))
   }, [searchQuery, buildings])
 
-  const loadBuildings = async () => {
+  const loadBuildings = useCallback(async () => {
     try {
       const data = await apiService.getBuildings()
       const buildingList: BuildingListItem[] = data.map((building) => ({
@@ -68,13 +64,12 @@ const RouteSelectionPage = () => {
         imageUrl: getBuildingImage(building.nodeName),
       }))
       setBuildings(buildingList)
-      setFilteredBuildings(buildingList)
     } catch (error) {
       console.error('Failed to load buildings:', error)
     }
-  }
+  }, [])
 
-  const handleBuildingSelect = (building: BuildingListItem) => {
+  const handleBuildingSelect = useCallback((building: BuildingListItem) => {
     if (selectionMode === 'start') {
       setStartPoint(building)
       setSelectionMode(null)
@@ -83,13 +78,13 @@ const RouteSelectionPage = () => {
       setSelectionMode(null)
     }
     setSearchQuery('')
-  }
+  }, [selectionMode])
 
-  const handleSwap = () => {
+  const handleSwap = useCallback(() => {
     const temp = startPoint
     setStartPoint(endPoint)
     setEndPoint(temp)
-  }
+  }, [startPoint, endPoint])
 
   const handleStartSearch = () => {
     setSelectionMode('start')

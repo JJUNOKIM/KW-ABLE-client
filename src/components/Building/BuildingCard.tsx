@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { BuildingListItem } from '@/types/building'
 import BtnArrow from '@/assets/icons/btn_arrow.svg'
 
@@ -6,7 +7,7 @@ interface BuildingCardProps {
   onClick?: () => void
 }
 
-export const BuildingCard = ({ building, onClick }: BuildingCardProps) => {
+export const BuildingCard = memo(({ building, onClick }: BuildingCardProps) => {
   return (
     <div
       onClick={onClick}
@@ -47,4 +48,4 @@ export const BuildingCard = ({ building, onClick }: BuildingCardProps) => {
       </div>
     </div>
   )
-}
+})

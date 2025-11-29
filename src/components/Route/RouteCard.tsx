@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Route } from '@/types/route'
 
 interface RouteCardProps {
@@ -6,7 +7,7 @@ interface RouteCardProps {
   selected?: boolean
 }
 
-export const RouteCard = ({ route, onClick, selected = false }: RouteCardProps) => {
+export const RouteCard = memo(({ route, onClick, selected = false }: RouteCardProps) => {
   return (
     <div
       onClick={onClick}
@@ -37,4 +38,4 @@ export const RouteCard = ({ route, onClick, selected = false }: RouteCardProps) 
       </p>
     </div>
   )
-}
+})

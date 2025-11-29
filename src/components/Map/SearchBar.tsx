@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, memo } from 'react'
 
 interface SearchBarProps {
   placeholder?: string
@@ -10,7 +10,7 @@ interface SearchBarProps {
   onChange?: (value: string) => void
 }
 
-export const SearchBar = ({
+export const SearchBar = memo(({
   placeholder = '내 주변 건물을 검색해보세요 !',
   onSearch,
   onFocus,
@@ -90,4 +90,4 @@ export const SearchBar = ({
       </div>
     </form>
   )
-}
+})

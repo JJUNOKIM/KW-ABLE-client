@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { KakaoMap, NodeData } from '@/components/Map/KakaoMap'
 import { SearchBar } from '@/components/Map/SearchBar'
@@ -20,11 +20,12 @@ const MapPage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('initial')
   const [buildings, setBuildings] = useState<BuildingListItem[]>([])
   const [nodes, setNodes] = useState<NodeData[]>([])
+  const [rawBuildingsData, setRawBuildingsData] = useState<any[]>([])
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [mapCenter, setMapCenter] = useState(location)
 
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3
     const toRad = (deg: number) => (deg * Math.PI) / 180
 
@@ -37,63 +38,17 @@ const MapPage = () => {
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
     return R * c
-  }
+  }, [])
 
   useEffect(() => {
     const loadBuildingsAndNodes = async () => {
       try {
         const response = await fetch('/api/buildings')
         const rawData = await response.json()
-
-        const buildingsData: BuildingListItem[] = rawData.map((item: any) => {
-          let distance: number | undefined
-
-          if (location) {
-            distance = calculateDistance(
-              location.latitude,
-              location.longitude,
-              item.latitude,
-              item.longitude
-            )
-          }
-
-          const detail = getBuildingDetail(item.nodeId)
-
-          return {
-            id: item.nodeId,
-            name: item.nodeName,
-            department: detail?.department,
-            distance: distance ? Math.round(distance) : undefined,
-            imageUrl: getBuildingImage(item.nodeName),
-          }
-        })
-
-        setBuildings(buildingsData)
-
-        const nodesData: NodeData[] = rawData.map((item: any) => {
-          let distance: number | undefined
-
-          if (location) {
-            distance = calculateDistance(
-              location.latitude,
-              location.longitude,
-              item.latitude,
-              item.longitude
-            )
-          }
-
-          return {
-            nodeId: item.nodeId,
-            nodeName: item.nodeName,
-            latitude: item.latitude,
-            longitude: item.longitude,
-            distance,
-          }
-        })
-
-        setNodes(nodesData)
+        setRawBuildingsData(rawData)
       } catch (error) {
         console.error('건물 데이터 로드 실패:', error)
+        setRawBuildingsData([])
         const mockBuildings: BuildingListItem[] = [
           {
             id: '1',
@@ -136,7 +91,64 @@ const MapPage = () => {
     }
 
     loadBuildingsAndNodes()
-  }, [location])
+  }, [])
+
+  const buildingsWithDistance = useMemo(() => {
+    if (!rawBuildingsData.length) return []
+
+    return rawBuildingsData.map((item: any) => {
+      let distance: number | undefined
+
+      if (location) {
+        distance = calculateDistance(
+          location.latitude,
+          location.longitude,
+          item.latitude,
+          item.longitude
+        )
+      }
+
+      const detail = getBuildingDetail(item.nodeId)
+
+      return {
+        id: item.nodeId,
+        name: item.nodeName,
+        department: detail?.department,
+        distance: distance ? Math.round(distance) : undefined,
+        imageUrl: getBuildingImage(item.nodeName),
+      }
+    })
+  }, [rawBuildingsData, location, calculateDistance])
+
+  const nodesWithDistance = useMemo(() => {
+    if (!rawBuildingsData.length) return []
+
+    return rawBuildingsData.map((item: any) => {
+      let distance: number | undefined
+
+      if (location) {
+        distance = calculateDistance(
+          location.latitude,
+          location.longitude,
+          item.latitude,
+          item.longitude
+        )
+      }
+
+      return {
+        nodeId: item.nodeId,
+        nodeName: item.nodeName,
+        latitude: item.latitude,
+        longitude: item.longitude,
+        distance,
+      }
+    })
+  }, [rawBuildingsData, location, calculateDistance])
+
+  useEffect(() => {
+    setBuildings(buildingsWithDistance)
+    setNodes(nodesWithDistance)
+  }, [buildingsWithDistance, nodesWithDistance])
 
   const handleSearchFocus = () => {
     setViewMode('search')
@@ -147,12 +159,9 @@ const MapPage = () => {
     setSearchQuery('')
   }
 
-  const handleBuildingCardClick = async (building: BuildingListItem) => {
+  const handleBuildingCardClick = useCallback((building: BuildingListItem) => {
     const detail = getBuildingDetail(building.id)
-
-    const response = await fetch('/api/buildings')
-    const rawData = await response.json()
-    const nodeData = rawData.find((item: any) => item.nodeId === building.id)
+    const nodeData = rawBuildingsData.find((item: any) => item.nodeId === building.id)
 
     const buildingDetail: Building = {
       ...building,
@@ -164,7 +173,7 @@ const MapPage = () => {
 
     setSelectedBuilding(buildingDetail)
     setViewMode('detail')
-  }
+  }, [rawBuildingsData])
 
   const handleCloseDetail = () => {
     setSelectedBuilding(null)
