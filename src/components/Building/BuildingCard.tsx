@@ -12,6 +12,7 @@ export const BuildingCard = memo(({ building, onClick }: BuildingCardProps) => {
     <div
       onClick={onClick}
       className="relative flex-shrink-0 w-[250px] h-[112px] bg-[#501b1b] rounded-xl shadow-[0px_2px_48px_0px_rgba(0,0,0,0.08)] cursor-pointer snap-center"
+      style={{ touchAction: 'manipulation' }}
     >
       <div className="absolute left-5 top-[21px] w-[70px] h-[70px] rounded-lg overflow-hidden bg-gray-300">
         {building.imageUrl ? (
@@ -19,6 +20,9 @@ export const BuildingCard = memo(({ building, onClick }: BuildingCardProps) => {
             src={building.imageUrl}
             alt={building.name}
             className="w-full h-full object-cover"
+            loading="lazy"
+            width={70}
+            height={70}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
@@ -44,7 +48,7 @@ export const BuildingCard = memo(({ building, onClick }: BuildingCardProps) => {
       </div>
 
       <div className="absolute right-[17px] top-[15px] w-6 h-6">
-        <img src={BtnArrow} alt="arrow" className="w-full h-full" />
+        <img src={BtnArrow} alt="arrow" className="w-full h-full" width={24} height={24} />
       </div>
     </div>
   )

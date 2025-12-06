@@ -160,19 +160,21 @@ const MapPage = () => {
   }
 
   const handleBuildingCardClick = useCallback((building: BuildingListItem) => {
-    const detail = getBuildingDetail(building.id)
-    const nodeData = rawBuildingsData.find((item: any) => item.nodeId === building.id)
+    requestAnimationFrame(() => {
+      const detail = getBuildingDetail(building.id)
+      const nodeData = rawBuildingsData.find((item: any) => item.nodeId === building.id)
 
-    const buildingDetail: Building = {
-      ...building,
-      latitude: nodeData?.latitude || 37.6205,
-      longitude: nodeData?.longitude || 127.0593,
-      phone: detail?.phone || '02-940-5114',
-      accessibility: detail?.accessibility,
-    }
+      const buildingDetail: Building = {
+        ...building,
+        latitude: nodeData?.latitude || 37.6205,
+        longitude: nodeData?.longitude || 127.0593,
+        phone: detail?.phone || '02-940-5114',
+        accessibility: detail?.accessibility,
+      }
 
-    setSelectedBuilding(buildingDetail)
-    setViewMode('detail')
+      setSelectedBuilding(buildingDetail)
+      setViewMode('detail')
+    })
   }, [rawBuildingsData])
 
   const handleCloseDetail = () => {
@@ -207,48 +209,40 @@ const MapPage = () => {
       />
 
       <div className="absolute top-6 left-0 right-0 z-10 safe-area-top">
-        {viewMode === 'initial' && (
-          <div className="bg-transparent">
-            <div className="px-5 py-3">
-              <img src={BoardingPointLogo} alt="Boarding Point" className="mb-2" width={82} height={17} />
-            </div>
-            <div className="px-5 pb-4">
-              <SearchBar placeholder="내 주변 건물을 검색해보세요!" onFocus={handleSearchFocus} />
-            </div>
+        <div className={`bg-transparent ${viewMode === 'initial' ? 'block' : 'hidden'}`}>
+          <div className="px-5 py-3">
+            <img src={BoardingPointLogo} alt="Boarding Point" className="mb-2" width={82} height={17} />
           </div>
-        )}
-
-        {viewMode === 'search' && (
-          <div className="bg-white shadow-md px-5 py-3">
-            <SearchBar
-              placeholder="광운대학교 건물 검색"
-              showBackButton
-              onBack={handleSearchBack}
-              value={searchQuery}
-              onChange={setSearchQuery}
-            />
+          <div className="px-5 pb-4">
+            <SearchBar placeholder="내 주변 건물을 검색해보세요!" onFocus={handleSearchFocus} />
           </div>
-        )}
-      </div>
+        </div>
 
-      {viewMode === 'search' && (
-        <div className="absolute top-[72px] left-0 right-0 bottom-0 z-20 bg-white">
-          <BuildingList
-            buildings={buildings.filter((b) => b.name.toLowerCase().includes(searchQuery.toLowerCase()))}
-            onBuildingClick={handleBuildingCardClick}
+        <div className={`bg-white shadow-md px-5 py-3 ${viewMode === 'search' ? 'block' : 'hidden'}`}>
+          <SearchBar
+            placeholder="광운대학교 건물 검색"
+            showBackButton
+            onBack={handleSearchBack}
+            value={searchQuery}
+            onChange={setSearchQuery}
           />
         </div>
-      )}
+      </div>
 
-      {viewMode === 'initial' && (
-        <div className="absolute bottom-10 left-0 right-0 z-10 pb-6 safe-area-bottom">
-          <div className="flex gap-4 px-5 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
-            {buildings.map((building) => (
-              <BuildingCard key={building.id} building={building} onClick={() => handleBuildingCardClick(building)} />
-            ))}
-          </div>
+      <div className={`absolute top-[72px] left-0 right-0 bottom-0 z-20 bg-white ${viewMode === 'search' ? 'block' : 'hidden'}`}>
+        <BuildingList
+          buildings={buildings.filter((b) => b.name.toLowerCase().includes(searchQuery.toLowerCase()))}
+          onBuildingClick={handleBuildingCardClick}
+        />
+      </div>
+
+      <div className={`absolute bottom-10 left-0 right-0 z-10 pb-6 safe-area-bottom ${viewMode === 'initial' ? 'block' : 'hidden'}`}>
+        <div className="flex gap-4 px-5 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
+          {buildings.map((building) => (
+            <BuildingCard key={building.id} building={building} onClick={() => handleBuildingCardClick(building)} />
+          ))}
         </div>
-      )}
+      </div>
 
       {(viewMode === 'initial' || viewMode === 'detail') && (
         <CurrentLocationButton onClick={handleCurrentLocation} className="absolute bottom-44 right-5 z-10" />

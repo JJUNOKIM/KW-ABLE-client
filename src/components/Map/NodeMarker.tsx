@@ -14,8 +14,8 @@ export const NodeMarker = ({ name, distance, onClick }: NodeMarkerProps) => {
     <div
       onClick={handleClick}
       onTouchEnd={handleClick}
-      className="cursor-pointer bg-white border border-[#FF7C7C] rounded-[8px] px-2 py-1 whitespace-nowrap shadow-sm hover:shadow-md transition-shadow"
-      style={{ touchAction: 'auto' }}
+      className="cursor-pointer bg-white border-2 border-[#501B1B] rounded-[8px] px-2 py-1 whitespace-nowrap shadow-sm hover:shadow-md transition-shadow"
+      style={{ touchAction: 'manipulation' }}
     >
       <div className="flex flex-col gap-0.5 items-center">
         <span className="text-[11px] font-semibold text-gray-800">{name}</span>

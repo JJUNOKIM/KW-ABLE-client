@@ -24,7 +24,7 @@ export const DualSearchBar = ({
       <div className="py-3 space-y-2">
         <div
           onClick={onStartClick}
-          style={{ backgroundColor: '#672424' }}
+          style={{ backgroundColor: '#672424', touchAction: 'manipulation' }}
           className="flex items-center gap-2 rounded-lg px-4 py-3 cursor-pointer"
         >
           <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: '#536DFE' }} />
@@ -40,7 +40,7 @@ export const DualSearchBar = ({
 
         <div
           onClick={onEndClick}
-          style={{ backgroundColor: '#672424' }}
+          style={{ backgroundColor: '#672424', touchAction: 'manipulation' }}
           className="flex items-center gap-2 rounded-lg px-4 py-3 cursor-pointer"
         >
           <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: '#501B1B' }} />
@@ -59,6 +59,7 @@ export const DualSearchBar = ({
         <button
           onClick={onSwap}
           className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center justify-center"
+          style={{ touchAction: 'manipulation' }}
           aria-label="출발/도착 바꾸기"
         >
           <img src={ChangeEachIcon} alt="교체" width={28} height={28} />

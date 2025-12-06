@@ -16,6 +16,7 @@ const BuildingListItemComponent = memo(({
   <div
     onClick={onClick}
     className="flex items-center gap-4 p-4 border-b border-gray-100 cursor-pointer"
+    style={{ touchAction: 'manipulation', contentVisibility: 'auto' }}
   >
     <div className="flex-1">
       <h3 className="text-lg font-bold text-gray-900 mb-1">{building.name}</h3>
@@ -32,6 +33,9 @@ const BuildingListItemComponent = memo(({
           src={building.imageUrl}
           alt={building.name}
           className="w-full h-full object-cover"
+          loading="lazy"
+          width={70}
+          height={70}
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">

@@ -16,6 +16,7 @@ export const RouteCard = memo(({ route, onClick, selected = false }: RouteCardPr
           ? 'bg-primary text-white shadow-lg'
           : 'bg-white text-gray-900 shadow-md hover:shadow-lg'
       }`}
+      style={{ touchAction: 'manipulation' }}
     >
       <h3
         className={`text-sm font-semibold mb-2 ${

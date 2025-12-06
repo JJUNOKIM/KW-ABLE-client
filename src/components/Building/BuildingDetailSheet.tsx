@@ -33,6 +33,8 @@ export const BuildingDetailSheet = ({
                 src={building.imageUrl}
                 alt={building.name}
                 className="w-full h-full object-cover"
+                width={400}
+                height={144}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -100,12 +102,14 @@ export const BuildingDetailSheet = ({
             <button
               onClick={onSetStart}
               className="flex-1 py-3 border-2 border-primary text-primary rounded-lg font-medium"
+              style={{ touchAction: 'manipulation' }}
             >
               출발
             </button>
             <button
               onClick={onSetDestination}
               className="flex-1 py-3 bg-primary text-white rounded-lg font-medium"
+              style={{ touchAction: 'manipulation' }}
             >
               도착
             </button>
