@@ -1,6 +1,6 @@
 export const ROUTE_COLORS = {
-  EASY: '#9E9E9E',
-  NORMAL: '#9E9E9E',
+  EASY: '#599468',
+  NORMAL: '#599468',
   HARD: '#FF9800',
   CAUTION: '#AF3C3C',
 } as const
