@@ -4,7 +4,7 @@ const BACKEND_URL = 'http://219.255.242.174:8082'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/buildings`)
+    const response = await fetch(`${BACKEND_URL}/buildings`)
     const data = await response.json()
 
     res.status(200).json(data)
