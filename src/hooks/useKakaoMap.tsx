@@ -25,6 +25,17 @@ export const useKakaoMap = ({
   onNodeClick,
   route = null
 }: UseKakaoMapProps = {}) => {
+  // =================================================================
+  // [학회용 위치 고정] 광운대학교 좌표 고정
+  // 롤백시 아래 activeCenter -> center 로 수정
+  const KW_UNIV_LOCATION = {
+    latitude: 37.6194,
+    longitude: 127.0598
+  };
+
+  const activeCenter = KW_UNIV_LOCATION;
+  // =================================================================
+
   const mapRef = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<kakao.maps.Map | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
@@ -38,19 +49,17 @@ export const useKakaoMap = ({
 
   useEffect(() => {
     if (!window.kakao?.maps) {
-      console.error('카카오맵 SDK를 불러올 수 없습니다')
       return
     }
 
     window.kakao.maps.load(() => {
       if (!mapRef.current) return
 
-      const defaultCenter = center || {
-        latitude: 37.6205,
-        longitude: 127.0593,
-      }
+      const mapCenter = new window.kakao.maps.LatLng(
+        activeCenter.latitude, 
+        activeCenter.longitude
+      )
 
-      const mapCenter = new window.kakao.maps.LatLng(defaultCenter.latitude, defaultCenter.longitude)
       const options = {
         center: mapCenter,
         level: level,
@@ -62,10 +71,11 @@ export const useKakaoMap = ({
     })
   }, [])
 
+  // 지도 중심 이동 및 현재 위치 마커 표시
   useEffect(() => {
-    if (!map || !center) return
+    if (!map || !activeCenter) return
 
-    const newCenter = new window.kakao.maps.LatLng(center.latitude, center.longitude)
+    const newCenter = new window.kakao.maps.LatLng(activeCenter.latitude, activeCenter.longitude)
     map.setCenter(newCenter)
 
     if (showCurrentLocation) {
@@ -97,8 +107,9 @@ export const useKakaoMap = ({
         markerRef.current = null
       }
     }
-  }, [map, center, showCurrentLocation])
+  }, [map, activeCenter, showCurrentLocation])
 
+  // 노드 마커 표시 (변경 없음)
   useEffect(() => {
     if (!map || !isLoaded) return
 
@@ -146,7 +157,6 @@ export const useKakaoMap = ({
   useEffect(() => {
     if (!map || !isLoaded) return
 
-    // 데이터 없으면 기존 경로 지우고 종료
     if (!route?.edges?.length) {
       if (currentRoute.current !== null) {
         polylinesRef.current.forEach((polyline) => polyline.setMap(null))
@@ -161,12 +171,10 @@ export const useKakaoMap = ({
       return
     }
 
-    // 이미 그린 경로면 다시 안 그림
     if (currentRoute.current === route) {
       return
     }
 
-    // 기존 경로 지우기
     polylinesRef.current.forEach((polyline) => polyline.setMap(null))
     polylinesRef.current = []
 
@@ -199,19 +207,16 @@ export const useKakaoMap = ({
       polylinesRef.current.push(line)
     })
 
-    // 처음 지도 범위 설정
     if (!isBoundsSet.current) {
       map.setBounds(bounds)
       isBoundsSet.current = true
 
-      // 지도 리렌더링
       requestAnimationFrame(() => {
         const level = (map as any).getLevel()
         ;(map as any).setLevel(level)
       })
     }
 
-    // 출발지 마커
     if (route.startNode) {
       startMarkerRef.current?.setMap(null)
 
@@ -238,7 +243,6 @@ export const useKakaoMap = ({
       startMarkerRef.current = startOverlay
     }
 
-    // 도착지 마커
     if (route.endNode) {
       endMarkerRef.current?.setMap(null)
 
