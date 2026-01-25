@@ -18,7 +18,7 @@ interface UseKakaoMapProps {
 }
 
 export const useKakaoMap = ({
-  center,
+  //center,
   level = 3,
   showCurrentLocation = false,
   nodes = [],
