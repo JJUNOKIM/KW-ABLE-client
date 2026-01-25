@@ -18,7 +18,7 @@ interface UseKakaoMapProps {
 }
 
 export const useKakaoMap = ({
-  center,
+  //center,
   level = 3,
   showCurrentLocation = false,
   nodes = [],
@@ -206,7 +206,7 @@ export const useKakaoMap = ({
 
     setTimeout(() => {
       if (map) {
-        map.relayout()
+        (map as any).relayout()
         const level = map.getLevel()
         map.setLevel(level)
       }
