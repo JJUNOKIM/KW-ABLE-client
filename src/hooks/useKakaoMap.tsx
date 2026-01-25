@@ -210,7 +210,7 @@ export const useKakaoMap = ({
         (map as any).relayout()
         map.panBy(1, 1) 
       }
-    }, 200)
+    }, 100)
 
     if (route.startNode) {
       startMarkerRef.current?.setMap(null)
