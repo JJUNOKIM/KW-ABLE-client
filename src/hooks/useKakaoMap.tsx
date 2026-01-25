@@ -18,7 +18,7 @@ interface UseKakaoMapProps {
 }
 
 export const useKakaoMap = ({
-  //center,
+  center,
   level = 3,
   showCurrentLocation = false,
   nodes = [],
@@ -204,13 +204,13 @@ export const useKakaoMap = ({
     map.setBounds(bounds)
     isBoundsSet.current = true
 
+    // 강제 렌더링 ( 1px 이동 )
     setTimeout(() => {
       if (map) {
         (map as any).relayout()
-        const level = map.getLevel()
-        map.setLevel(level)
+        map.panBy(1, 1) 
       }
-    }, 150)
+    }, 200)
 
     if (route.startNode) {
       startMarkerRef.current?.setMap(null)
