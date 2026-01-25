@@ -1,4 +1,4 @@
-import ChangeEachIcon from '@/assets/icons/icons_changeEach.svg'
+import ChangeEachIcon from '@/assets/icons/swap_icon.svg';
 
 interface DualSearchBarProps {
   startValue?: string
