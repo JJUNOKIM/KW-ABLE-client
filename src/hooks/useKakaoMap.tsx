@@ -25,16 +25,12 @@ export const useKakaoMap = ({
   onNodeClick,
   route = null
 }: UseKakaoMapProps = {}) => {
-  // =================================================================
-  // [학회용 위치 고정] 광운대학교 좌표 고정
-  // 롤백시 아래 activeCenter -> center 로 수정
   const KW_UNIV_LOCATION = {
     latitude: 37.6194,
     longitude: 127.0598
   };
 
   const activeCenter = KW_UNIV_LOCATION;
-  // =================================================================
 
   const mapRef = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<kakao.maps.Map | null>(null)
@@ -71,7 +67,6 @@ export const useKakaoMap = ({
     })
   }, [])
 
-  // 지도 중심 이동 및 현재 위치 마커 표시
   useEffect(() => {
     if (!map || !activeCenter) return
 
@@ -109,7 +104,6 @@ export const useKakaoMap = ({
     }
   }, [map, activeCenter, showCurrentLocation])
 
-  // 노드 마커 표시 (변경 없음)
   useEffect(() => {
     if (!map || !isLoaded) return
 
@@ -207,15 +201,16 @@ export const useKakaoMap = ({
       polylinesRef.current.push(line)
     })
 
-    if (!isBoundsSet.current) {
-      map.setBounds(bounds)
-      isBoundsSet.current = true
+    map.setBounds(bounds)
+    isBoundsSet.current = true
 
-      requestAnimationFrame(() => {
-        const level = (map as any).getLevel()
-        ;(map as any).setLevel(level)
-      })
-    }
+    setTimeout(() => {
+      if (map) {
+        map.relayout()
+        const level = map.getLevel()
+        map.setLevel(level)
+      }
+    }, 150)
 
     if (route.startNode) {
       startMarkerRef.current?.setMap(null)
